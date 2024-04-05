@@ -1,5 +1,6 @@
-# Brief Description About the Project: 
-## This project includes how to install and use Django, creating application, preparing models, using faker to load fake data, improve Django admin and creating requirements.txt 
+# Project Description
+This project provides comprehensive guidelines on how to install and use Django. It includes creating an application, preparing models, using faker to load fake data, enhancing Django admin functionality, and creating a `requirements.txt` file.
 
-# Authors:
-## Samantha Anne P. Quizon & Ria Joy Brizo  
+# Authors
+- Samantha Anne P. Quizon
+- Ria Joy Brizo
