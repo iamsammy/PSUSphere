@@ -4,6 +4,7 @@ This project provides comprehensive guidelines on how to install and use Django.
 # Authors
 - Samantha Anne P. Quizon
 - Ria Joy Brizo
+<<<<<<< HEAD
 
 
 
@@ -62,3 +63,5 @@ This project provides comprehensive guidelines on how to install and use Django.
 <b>{{paginator.count}}</b> entries</div> 
 </div> 
 {% endif %} 
+=======
+>>>>>>> 1b3e9849dd92df8dee58c142e7915dbfb7392d0b
