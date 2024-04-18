@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from studentorg.models import Organization, OrgMember
-from studentorg.forms import OrganizationForm, OrgMemberForm
+from studentorg.models import Organization, OrgMember, Student, College, Program
+from studentorg.forms import OrganizationForm, OrgMemberForm, StudentForm, CollegeForm, ProgramForm
 from django.urls import reverse_lazy
 from typing import Any
 from django.db.models.query import QuerySet
@@ -59,7 +59,7 @@ class OrgMemberList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['organization_list'] = Organization.objects.all()  # Retrieve all objects from 'AnotherModel'
+        context['organization_list'] = Organization.objects.all()  
         return context
 
     def get_queryset(self, *args, **kwargs):
@@ -87,3 +87,112 @@ class OrgMemberDeleteView(DeleteView):
     model = OrgMember
     template_name = 'orgmember_del.html'
     success_url = reverse_lazy('orgmember-list')
+
+
+class StudentList(ListView):
+    model = Student
+    context_object_name = 'student'
+    template_name  = 'student_list.html'
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['student_list'] = Student.objects.all()  
+
+    def get_queryset(self, *args, **kwargs):
+         qs = super(StudentList, self).get_queryset(*args, **kwargs)
+         if self.request.GET.get("q") != None:
+             query = self.request.GET.get('q')
+             qs = qs = qs.filter(Q(firstname__icontains=query) |
+                           Q(lastname__icontains=query) | Q(student_id__icontains=query) | Q(program__name__icontains=query))
+         return qs
+
+class StudentCreateView(CreateView):
+    model = Student
+    form_class = StudentForm
+    template_name = 'student_add.html'
+    success_url = reverse_lazy('student-list')
+
+class StudentUpdateView(UpdateView):
+    model = Student
+    form_class = StudentForm
+    template_name = 'student_edit.html'
+    success_url = reverse_lazy('student-list')
+
+class StudentDeleteView(DeleteView):
+    model = Student
+    template_name = 'student_del.html'
+    success_url = reverse_lazy('student-list')
+
+class CollegeList(ListView):
+    model = College
+    context_object_name = 'college'
+    template_name  = 'college_list.html'
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['college'] = College.objects.all()
+        return context
+
+    def get_queryset(self, *args, **kwargs):
+         qs = super(CollegeList, self).get_queryset(*args, **kwargs)
+         if self.request.GET.get("q") != None:
+             query = self.request.GET.get('q')
+             qs = qs = qs.filter(Q(college_name__icontains=query))
+                           
+         return qs
+
+class CollegeCreateView(CreateView):
+    model = College
+    form_class = CollegeForm
+    template_name = 'college_add.html'
+    success_url = reverse_lazy('college-list')
+
+class CollegeUpdateView(UpdateView):
+    model = College
+    form_class = CollegeForm
+    template_name = 'college_edit.html'
+    success_url = reverse_lazy('college-list')
+
+class CollegeDeleteView(DeleteView):
+    model = College
+    template_name = 'college_del.html'
+    success_url = reverse_lazy('college-list')
+
+
+class ProgramList(ListView):
+    model = Program
+    context_object_name = 'program'
+    template_name  = 'program_list.html'
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['program'] = Program.objects.all()
+        return context
+
+    def get_queryset(self, *args, **kwargs):
+         qs = super(ProgramList, self).get_queryset(*args, **kwargs)
+         if self.request.GET.get("q") != None:
+             query = self.request.GET.get('q')
+             qs = qs = qs.filter(Q(prog_name__icontains=query))
+                           
+         return qs
+
+class ProgramCreateView(CreateView):
+    model = Program
+    form_class = ProgramForm
+    template_name = 'program_add.html'
+    success_url = reverse_lazy('program-list')
+
+class ProgramUpdateView(UpdateView):
+    model = Program
+    form_class = ProgramForm
+    template_name = 'program_edit.html'
+    success_url = reverse_lazy('program-list')
+
+class ProgramDeleteView(DeleteView):
+    model = Program
+    template_name = 'program_del.html'
+    success_url = reverse_lazy('program-list')
