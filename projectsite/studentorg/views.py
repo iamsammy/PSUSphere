@@ -9,6 +9,9 @@ from django.db.models.query import QuerySet
 from django.db.models import Q
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.db import connection
+from django.db.models import Count
 
 
 
@@ -195,3 +198,104 @@ class StudentDeleteView(DeleteView):
     model = Student
     template_name = 'student_del.html'
     success_url = reverse_lazy('student-list')
+
+class ChartView(ListView):
+    template_name = 'chart.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get_queryset(self, *args, **kwargs):
+        pass
+
+def BarStudentPerProgram(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT studentorg_program.prog_name AS program_name, COUNT(studentorg_student.id) AS num_students
+            FROM studentorg_student
+            INNER JOIN studentorg_program ON studentorg_student.program_id = studentorg_program.id
+            GROUP BY program_id
+        """)
+        rows = cursor.fetchall()
+
+    result_with_program_names = {}
+    for row in rows:
+        program_name = row[0]
+        num_students = row[1]
+        result_with_program_names[program_name] = num_students
+
+    return JsonResponse(result_with_program_names)
+
+def BarProgramPerCollege(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT c.college_name, COUNT(p.id) as program_count
+               FROM studentorg_program p
+               INNER JOIN studentorg_college c ON p.college_id = c.id
+               GROUP BY c.college_name
+        """)
+        rows = cursor.fetchall()
+
+    result_with_program_count = {}
+    for row in rows:
+        college_name = row[0]
+        num_program = row[1]
+        result_with_program_count[college_name] = num_program
+
+    return JsonResponse(result_with_program_count)
+
+def PieStudentPerCollege(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT c.college_name AS college_name, COUNT(s.id) AS num_students
+            FROM studentorg_student s
+            INNER JOIN studentorg_program p ON s.program_id = p.id
+            INNER JOIN studentorg_college c ON p.college_id = c.id
+            GROUP BY c.college_name
+        """)
+        rows = cursor.fetchall()
+
+    result_with_college_names = {}
+    for row in rows:
+        college_name = row[0]
+        num_students = row[1]
+        result_with_college_names[college_name] = num_students
+
+    return JsonResponse(result_with_college_names)
+
+def DoughnutOrgPerCollege(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT c.college_name AS college_name, COUNT(o.id) AS org_count
+            FROM studentorg_organization o
+            INNER JOIN studentorg_college c ON o.college_id = c.id
+            GROUP BY c.college_name
+        """)
+        rows = cursor.fetchall()
+
+    result_with_org_count = {}
+    for row in rows:
+        college_name = row[0]
+        num_org = row[1]
+        result_with_org_count[college_name] = num_org
+
+    return JsonResponse(result_with_org_count)
+
+def RadarMemberPerOrg(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT o.name, COUNT(om.id) as member_count
+            FROM studentorg_orgmember om
+            INNER JOIN studentorg_organization o ON om.organization_id = o.id
+            GROUP BY o.name
+        """)
+        rows = cursor.fetchall()
+
+    results = {}
+    for row in rows:
+        org_name = row[0]
+        num_member = row[1]
+        results[org_name] = num_member
+
+    return JsonResponse(results)
